@@ -1,0 +1,46 @@
+# Task 6: Machine Learning with Python (Decision Tree using provided dataset)
+
+# Step 1: Import libraries
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+import matplotlib.pyplot as plt
+
+# Step 2: Load the dataset
+data = pd.read_csv('runners_data.csv')
+
+# Example structure of dataset:
+# Running>10h,Fatigue,MenstrualDisturbance,OveruseFracture
+# Yes,Yes,Yes,Yes
+# No,No,No,No
+# ...
+
+# Step 3: Encode categorical variables (Yes=1, No=0)
+data_encoded = data.replace({'Yes':1, 'No':0})
+
+# Step 4: Split dataset into features and target
+X = data_encoded[['Running>10h','Fatigue','MenstrualDisturbance']]
+y = data_encoded['OveruseFracture']
+
+# Step 5: Train Decision Tree
+clf = DecisionTreeClassifier(max_depth=3, random_state=42)  # depth=3 to mimic manual splits
+clf.fit(X, y)
+
+# Step 6: Visualize the tree
+plt.figure(figsize=(12,8))
+plot_tree(clf, feature_names=X.columns, class_names=['No Fracture','Fracture'], filled=True, rounded=True)
+plt.show()
+
+# Step 7 (optional): Print probabilities for each leaf
+n_nodes = clf.tree_.node_count
+children_left = clf.tree_.children_left
+children_right = clf.tree_.children_right
+feature = clf.tree_.feature
+threshold = clf.tree_.threshold
+value = clf.tree_.value
+
+print("\nLeaf node probabilities (Overuse Fracture):")
+for i in range(n_nodes):
+    if children_left[i] == children_right[i]:  # it's a leaf
+        total = value[i].sum()
+        prob = value[i][0][1]/total  # probability of fracture
+        print(f"Leaf {i}: Probability of fracture = {prob:.2f}, samples = {int(total)}")
